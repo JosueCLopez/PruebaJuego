@@ -1,185 +1,231 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz de Ángulos Internos</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz de Ángulos Internos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col items-center justify-center">
 
-  <!-- Pantalla de inicio -->
-  <div id="pantalla-inicio" class="text-center space-y-4">
-    <h1 class="text-3xl font-bold">Quiz: Suma de Ángulos Internos</h1>
-    <input id="nombre-jugador" type="text" placeholder="Ingresa tu nombre" class="border p-2 rounded" />
-    <button onclick="comenzarJuego()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Jugar</button>
-
-    <h2 class="text-2xl mt-8">Ranking de Jugadores</h2>
-    <ul id="ranking" class="text-left"></ul>
-  </div>
-
-  <!-- Pantalla de preguntas -->
-  <div id="pantalla-preguntas" class="hidden text-center space-y-4">
-    <h2 id="pregunta" class="text-2xl font-semibold"></h2>
-    <div id="opciones" class="flex flex-col space-y-2"></div>
-    <div class="mt-4">
-      <p>Correctas: <span id="correctas">0</span> | Incorrectas: <span id="incorrectas">0</span></p>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 relative">
+    <!-- Pantalla de inicio -->
+    <div id="pantalla-inicio" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+        <h1 class="text-2xl font-bold text-center">Quiz de Ángulos Internos</h1>
+        <input type="text" id="nombre-jugador" placeholder="Ingresa tu nombre" class="w-full p-2 border rounded" />
+        <button onclick="comenzarJuego()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">Jugar</button>
+        <div class="mt-4">
+            <h2 class="text-lg font-semibold">Ranking de Jugadores</h2>
+            <canvas id="graficoRanking"></canvas>
+        </div>
     </div>
-  </div>
 
-  <!-- Pantalla final -->
-  <div id="pantalla-final" class="hidden text-center space-y-4">
-    <h2 class="text-2xl font-bold">¡Juego terminado!</h2>
-    <p>Correctas: <span id="final-correctas"></span></p>
-    <p>Incorrectas: <span id="final-incorrectas"></span></p>
-    <p>Puntaje total: <span id="puntaje-total"></span></p>
-    <p>Tu posición en el ranking: <span id="posicion-ranking"></span></p>
+    <!-- Pantalla de preguntas -->
+    <div id="pantalla-preguntas" class="relative hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500 z-10">
+        <svg id="fondo-pregunta" class="absolute top-0 left-0 w-full h-full z-0 pointer-events-none"></svg>
+        <h2 class="text-xl font-bold relative z-10">Pregunta <span id="numero-pregunta">1</span></h2>
+        <p id="pregunta-texto" class="text-lg relative z-10">¿Cuál es la suma de los ángulos internos de un triángulo?</p>
+        <div id="opciones" class="space-y-2 relative z-10"></div>
+    </div>
 
-    <canvas id="graficoRanking" class="mx-auto" width="300" height="200"></canvas>
+    <!-- Pantalla de resultados -->
+    <div id="pantalla-final" class="hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+        <h2 class="text-2xl font-bold text-center">Resultados Finales</h2>
+        <p id="resultado-texto" class="text-lg text-center"></p>
+        <canvas id="graficoRankingFinal"></canvas>
+        <button onclick="reiniciarJuego()" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors">Jugar de nuevo</button>
+    </div>
 
-    <button onclick="reiniciarJuego()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Volver al inicio</button>
-  </div>
+    <script>
+        const preguntas = [
+            {
+                pregunta: "¿Cuál es la suma de los ángulos internos de un triángulo?",
+                opciones: ["180°", "360°", "90°", "270°"],
+                respuestaCorrecta: "180°"
+            },
+            {
+                pregunta: "¿Cuál es la suma de los ángulos internos de un cuadrado?",
+                opciones: ["180°", "360°", "270°", "540°"],
+                respuestaCorrecta: "360°"
+            },
+            {
+                pregunta: "¿Cuál es la suma de los ángulos internos de un pentágono?",
+                opciones: ["540°", "360°", "720°", "900°"],
+                respuestaCorrecta: "540°"
+            },
+        ];
 
-  <script>
-    const preguntas = [
-      { lados: 3, opciones: [180, 360, 90, 270], respuestaCorrecta: 180 },
-      { lados: 4, opciones: [360, 270, 180, 90], respuestaCorrecta: 360 },
-      { lados: 5, opciones: [540, 360, 450, 720], respuestaCorrecta: 540 },
-      { lados: 6, opciones: [720, 540, 600, 480], respuestaCorrecta: 720 },
-      { lados: 7, opciones: [900, 1080, 1260, 1200], respuestaCorrecta: 900 },
-      { lados: 8, opciones: [1080, 1260, 1440, 1320], respuestaCorrecta: 1080 },
-      { lados: 9, opciones: [1260, 1440, 1620, 1800], respuestaCorrecta: 1260 },
-      { lados: 10, opciones: [1440, 1620, 1800, 1980], respuestaCorrecta: 1440 }
-    ];
+        let preguntaActual = 0;
+        let respuestasCorrectas = 0;
+        let respuestasIncorrectas = 0;
+        let jugadores = JSON.parse(localStorage.getItem('jugadores')) || [];
+        let jugadorActual = "";
 
-    let nombreJugador = '';
-    let preguntaActual = 0;
-    let correctas = 0;
-    let incorrectas = 0;
-    let ranking = JSON.parse(localStorage.getItem('ranking')) || [];
-
-    function actualizarRanking() {
-      const rankingElement = document.getElementById('ranking');
-      rankingElement.innerHTML = '';
-      ranking.sort((a, b) => b.puntaje - a.puntaje);
-      ranking.forEach((jugador, index) => {
-        const li = document.createElement('li');
-        li.textContent = `${index + 1}. ${jugador.nombre} - ${jugador.puntaje} pts`;
-        rankingElement.appendChild(li);
-      });
-    }
-
-    function comenzarJuego() {
-      const inputNombre = document.getElementById('nombre-jugador');
-      if (!inputNombre.value.trim()) {
-        alert('Por favor, ingresa tu nombre');
-        return;
-      }
-      nombreJugador = inputNombre.value.trim();
-      document.getElementById('pantalla-inicio').classList.add('hidden');
-      document.getElementById('pantalla-preguntas').classList.remove('hidden');
-      cargarPregunta();
-    }
-
-    function cargarPregunta() {
-      if (preguntaActual >= preguntas.length) {
-        finalizarJuego();
-        return;
-      }
-      const pregunta = preguntas[preguntaActual];
-      document.getElementById('pregunta').textContent = `¿Cuál es la suma de los ángulos internos de un polígono de ${pregunta.lados} lados?`;
-      const opcionesContainer = document.getElementById('opciones');
-      opcionesContainer.innerHTML = '';
-      pregunta.opciones.forEach(opcion => {
-        const btn = document.createElement('button');
-        btn.textContent = opcion;
-        btn.className = 'bg-white border px-4 py-2 rounded hover:bg-gray-200';
-        btn.onclick = () => verificarRespuesta(opcion, btn);
-        opcionesContainer.appendChild(btn);
-      });
-    }
-
-    function verificarRespuesta(seleccion, boton) {
-      const pregunta = preguntas[preguntaActual];
-      const botones = document.querySelectorAll('#opciones button');
-
-      if (seleccion === pregunta.respuestaCorrecta) {
-        correctas++;
-        boton.classList.add('bg-green-400', 'text-white');
-      } else {
-        incorrectas++;
-        boton.classList.add('bg-red-400', 'text-white');
-        botones.forEach(b => {
-          if (parseInt(b.textContent) === pregunta.respuestaCorrecta) {
-            b.classList.add('bg-green-400', 'text-white');
-          }
-        });
-      }
-
-      document.getElementById('correctas').textContent = correctas;
-      document.getElementById('incorrectas').textContent = incorrectas;
-
-      setTimeout(() => {
-        preguntaActual++;
-        cargarPregunta();
-      }, 1000);
-    }
-
-    function finalizarJuego() {
-      document.getElementById('pantalla-preguntas').classList.add('hidden');
-      document.getElementById('pantalla-final').classList.remove('hidden');
-
-      const puntajeFinal = correctas * 10;
-      ranking.push({ nombre: nombreJugador, puntaje: puntajeFinal });
-      localStorage.setItem('ranking', JSON.stringify(ranking));
-      actualizarRanking();
-
-      ranking.sort((a, b) => b.puntaje - a.puntaje);
-      const posicion = ranking.findIndex(j => j.nombre === nombreJugador && j.puntaje === puntajeFinal) + 1;
-
-      document.getElementById('final-correctas').textContent = correctas;
-      document.getElementById('final-incorrectas').textContent = incorrectas;
-      document.getElementById('puntaje-total').textContent = puntajeFinal;
-      document.getElementById('posicion-ranking').textContent = posicion;
-
-      renderizarGrafico();
-    }
-
-    function reiniciarJuego() {
-      preguntaActual = 0;
-      correctas = 0;
-      incorrectas = 0;
-      document.getElementById('pantalla-final').classList.add('hidden');
-      document.getElementById('pantalla-inicio').classList.remove('hidden');
-      actualizarRanking();
-    }
-
-    function renderizarGrafico() {
-      const ctx = document.getElementById('graficoRanking').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ranking.map(j => j.nombre),
-          datasets: [{
-            label: 'Puntaje',
-            data: ranking.map(j => j.puntaje),
-            backgroundColor: 'rgba(59, 130, 246, 0.5)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
+        function actualizarGrafico() {
+            const ctx = document.getElementById('graficoRanking').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: jugadores.map(j => j.nombre),
+                    datasets: [{
+                        label: 'Puntaje',
+                        data: jugadores.map(j => j.puntaje),
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 1000
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
         }
-      });
-    }
 
-    actualizarRanking();
-  </script>
+        function comenzarJuego() {
+            const nombre = document.getElementById('nombre-jugador').value.trim();
+            if (!nombre) {
+                alert('Por favor, ingresa tu nombre.');
+                return;
+            }
+            jugadorActual = nombre;
+            document.getElementById('pantalla-inicio').classList.add('hidden');
+            document.getElementById('pantalla-preguntas').classList.remove('hidden');
+            mostrarPregunta();
+        }
+
+        function mostrarPregunta() {
+            const pregunta = preguntas[preguntaActual];
+            document.getElementById('numero-pregunta').textContent = preguntaActual + 1;
+            document.getElementById('pregunta-texto').textContent = pregunta.pregunta;
+
+            const opcionesDiv = document.getElementById('opciones');
+            opcionesDiv.innerHTML = '';
+
+            const fondo = document.getElementById('fondo-pregunta');
+            fondo.innerHTML = '';
+
+            if (pregunta.pregunta.toLowerCase().includes("triángulo")) {
+                for (let i = 0; i < 15; i++) {
+                    const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    triangle.setAttribute("points", "10,0 20,20 0,20");
+                    triangle.setAttribute("fill", "rgba(59, 130, 246, 0.3)");
+                    triangle.setAttribute("transform", `translate(${Math.random() * 300}, ${Math.random() * 300}) scale(${Math.random() + 0.5}) rotate(${Math.random() * 360})`);
+                    triangle.style.opacity = 0;
+                    fondo.appendChild(triangle);
+
+                    setTimeout(() => {
+                        triangle.style.transition = 'all 0.8s ease';
+                        triangle.style.opacity = 1;
+                        triangle.setAttribute("transform", `translate(${Math.random() * 300}, ${Math.random() * 300}) scale(${Math.random() + 0.8}) rotate(${Math.random() * 720})`);
+                    }, i * 100);
+                }
+            }
+
+            pregunta.opciones.forEach(opcion => {
+                const boton = document.createElement('button');
+                boton.textContent = opcion;
+                boton.className = 'w-full p-2 border rounded bg-white hover:bg-gray-100 transition-colors';
+                boton.onclick = () => seleccionarRespuesta(opcion, boton);
+                opcionesDiv.appendChild(boton);
+            });
+
+            opcionesDiv.parentElement.style.opacity = 0;
+            opcionesDiv.parentElement.style.transform = 'translateX(-100px)';
+            setTimeout(() => {
+                opcionesDiv.parentElement.style.transition = 'all 0.5s';
+                opcionesDiv.parentElement.style.opacity = 1;
+                opcionesDiv.parentElement.style.transform = 'translateX(0)';
+            }, 100);
+        }
+
+        function seleccionarRespuesta(respuestaSeleccionada, boton) {
+            const pregunta = preguntas[preguntaActual];
+
+            Array.from(document.getElementById('opciones').children).forEach(b => {
+                b.disabled = true;
+                if (b.textContent === pregunta.respuestaCorrecta) {
+                    b.classList.add('bg-green-300');
+                    b.classList.add('animate-pulse');
+                } else if (b.textContent === respuestaSeleccionada) {
+                    b.classList.add('bg-red-300');
+                    b.classList.add('animate-pulse');
+                }
+            });
+
+            if (respuestaSeleccionada === pregunta.respuestaCorrecta) {
+                respuestasCorrectas++;
+            } else {
+                respuestasIncorrectas++;
+            }
+
+            preguntaActual++;
+
+            setTimeout(() => {
+                if (preguntaActual < preguntas.length) {
+                    mostrarPregunta();
+                } else {
+                    mostrarResultados();
+                }
+            }, 800);
+        }
+
+        function mostrarResultados() {
+            document.getElementById('pantalla-preguntas').classList.add('hidden');
+            document.getElementById('pantalla-final').classList.remove('hidden');
+
+            const puntajeFinal = respuestasCorrectas * 10;
+            jugadores.push({ nombre: jugadorActual, puntaje: puntajeFinal });
+            jugadores.sort((a, b) => b.puntaje - a.puntaje);
+            localStorage.setItem('jugadores', JSON.stringify(jugadores));
+
+            const posicion = jugadores.findIndex(j => j.nombre === jugadorActual) + 1;
+            document.getElementById('resultado-texto').textContent = `Respuestas correctas: ${respuestasCorrectas}, Incorrectas: ${respuestasIncorrectas}. Puntaje: ${puntajeFinal}. Tu posición: #${posicion}`;
+
+            const ctx = document.getElementById('graficoRankingFinal').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: jugadores.map(j => j.nombre),
+                    datasets: [{
+                        label: 'Puntaje',
+                        data: jugadores.map(j => j.puntaje),
+                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutBounce'
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function reiniciarJuego() {
+            preguntaActual = 0;
+            respuestasCorrectas = 0;
+            respuestasIncorrectas = 0;
+            document.getElementById('pantalla-final').classList.add('hidden');
+            document.getElementById('pantalla-inicio').classList.remove('hidden');
+            actualizarGrafico();
+        }
+
+        actualizarGrafico();
+    </script>
 </body>
+
 </html>
