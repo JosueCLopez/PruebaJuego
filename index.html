@@ -6,13 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz de Ángulos Internos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+        .fondo-triangulos {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .triangulo {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid rgba(59, 130, 246, 0.2);
+            animation: flotar 6s infinite ease-in-out;
+        }
+        @keyframes flotar {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(30deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 relative">
+    <!-- Fondo dinámico -->
+    <div id="fondo-dinamico" class="fondo-triangulos hidden"></div>
+
     <!-- Pantalla de inicio -->
-    <div id="pantalla-inicio" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+    <div id="pantalla-inicio" class="pantalla w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
         <h1 class="text-2xl font-bold text-center">Quiz de Ángulos Internos</h1>
         <input type="text" id="nombre-jugador" placeholder="Ingresa tu nombre" class="w-full p-2 border rounded" />
         <button onclick="comenzarJuego()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">Jugar</button>
@@ -23,15 +53,14 @@
     </div>
 
     <!-- Pantalla de preguntas -->
-    <div id="pantalla-preguntas" class="relative hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500 z-10">
-        <svg id="fondo-pregunta" class="absolute top-0 left-0 w-full h-full z-0 pointer-events-none"></svg>
-        <h2 class="text-xl font-bold relative z-10">Pregunta <span id="numero-pregunta">1</span></h2>
-        <p id="pregunta-texto" class="text-lg relative z-10">¿Cuál es la suma de los ángulos internos de un triángulo?</p>
-        <div id="opciones" class="space-y-2 relative z-10"></div>
+    <div id="pantalla-preguntas" class="pantalla hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500 z-10">
+        <h2 class="text-xl font-bold">Pregunta <span id="numero-pregunta">1</span></h2>
+        <p id="pregunta-texto" class="text-lg">¿Cuál es la suma de los ángulos internos de un triángulo?</p>
+        <div id="opciones" class="space-y-2"></div>
     </div>
 
     <!-- Pantalla de resultados -->
-    <div id="pantalla-final" class="hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+    <div id="pantalla-final" class="pantalla hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
         <h2 class="text-2xl font-bold text-center">Resultados Finales</h2>
         <p id="resultado-texto" class="text-lg text-center"></p>
         <canvas id="graficoRankingFinal"></canvas>
@@ -43,7 +72,8 @@
             {
                 pregunta: "¿Cuál es la suma de los ángulos internos de un triángulo?",
                 opciones: ["180°", "360°", "90°", "270°"],
-                respuestaCorrecta: "180°"
+                respuestaCorrecta: "180°",
+                tipo: "triangulos"
             },
             {
                 pregunta: "¿Cuál es la suma de los ángulos internos de un cuadrado?",
@@ -79,9 +109,7 @@
                 },
                 options: {
                     responsive: true,
-                    animation: {
-                        duration: 1000
-                    },
+                    animation: { duration: 1000 },
                     scales: {
                         y: { beginAtZero: true }
                     }
@@ -91,13 +119,10 @@
 
         function comenzarJuego() {
             const nombre = document.getElementById('nombre-jugador').value.trim();
-            if (!nombre) {
-                alert('Por favor, ingresa tu nombre.');
-                return;
-            }
+            if (!nombre) return alert('Por favor, ingresa tu nombre.');
+
             jugadorActual = nombre;
-            document.getElementById('pantalla-inicio').classList.add('hidden');
-            document.getElementById('pantalla-preguntas').classList.remove('hidden');
+            transicionPantallas('pantalla-inicio', 'pantalla-preguntas');
             mostrarPregunta();
         }
 
@@ -108,27 +133,6 @@
 
             const opcionesDiv = document.getElementById('opciones');
             opcionesDiv.innerHTML = '';
-
-            const fondo = document.getElementById('fondo-pregunta');
-            fondo.innerHTML = '';
-
-            if (pregunta.pregunta.toLowerCase().includes("triángulo")) {
-                for (let i = 0; i < 15; i++) {
-                    const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                    triangle.setAttribute("points", "10,0 20,20 0,20");
-                    triangle.setAttribute("fill", "rgba(59, 130, 246, 0.3)");
-                    triangle.setAttribute("transform", `translate(${Math.random() * 300}, ${Math.random() * 300}) scale(${Math.random() + 0.5}) rotate(${Math.random() * 360})`);
-                    triangle.style.opacity = 0;
-                    fondo.appendChild(triangle);
-
-                    setTimeout(() => {
-                        triangle.style.transition = 'all 0.8s ease';
-                        triangle.style.opacity = 1;
-                        triangle.setAttribute("transform", `translate(${Math.random() * 300}, ${Math.random() * 300}) scale(${Math.random() + 0.8}) rotate(${Math.random() * 720})`);
-                    }, i * 100);
-                }
-            }
-
             pregunta.opciones.forEach(opcion => {
                 const boton = document.createElement('button');
                 boton.textContent = opcion;
@@ -137,13 +141,7 @@
                 opcionesDiv.appendChild(boton);
             });
 
-            opcionesDiv.parentElement.style.opacity = 0;
-            opcionesDiv.parentElement.style.transform = 'translateX(-100px)';
-            setTimeout(() => {
-                opcionesDiv.parentElement.style.transition = 'all 0.5s';
-                opcionesDiv.parentElement.style.opacity = 1;
-                opcionesDiv.parentElement.style.transform = 'translateX(0)';
-            }, 100);
+            mostrarFondoDinamico(pregunta.tipo);
         }
 
         function seleccionarRespuesta(respuestaSeleccionada, boton) {
@@ -151,13 +149,19 @@
 
             Array.from(document.getElementById('opciones').children).forEach(b => {
                 b.disabled = true;
-                if (b.textContent === pregunta.respuestaCorrecta) {
-                    b.classList.add('bg-green-300');
-                    b.classList.add('animate-pulse');
-                } else if (b.textContent === respuestaSeleccionada) {
-                    b.classList.add('bg-red-300');
-                    b.classList.add('animate-pulse');
+                const esCorrecta = b.textContent === pregunta.respuestaCorrecta;
+                const esSeleccionada = b.textContent === respuestaSeleccionada;
+
+                if (esCorrecta) {
+                    b.classList.add('bg-green-300', 'animate-pulse');
+                } else if (esSeleccionada) {
+                    b.classList.add('bg-red-300', 'animate-pulse');
                 }
+
+                // Forzar reanimación para móviles
+                b.style.animation = 'none';
+                void b.offsetWidth;
+                b.style.animation = '';
             });
 
             if (respuestaSeleccionada === pregunta.respuestaCorrecta) {
@@ -174,12 +178,11 @@
                 } else {
                     mostrarResultados();
                 }
-            }, 800);
+            }, 1000);
         }
 
         function mostrarResultados() {
-            document.getElementById('pantalla-preguntas').classList.add('hidden');
-            document.getElementById('pantalla-final').classList.remove('hidden');
+            transicionPantallas('pantalla-preguntas', 'pantalla-final');
 
             const puntajeFinal = respuestasCorrectas * 10;
             jugadores.push({ nombre: jugadorActual, puntaje: puntajeFinal });
@@ -205,7 +208,7 @@
                 options: {
                     responsive: true,
                     animation: {
-                        duration: 2000,
+                        duration: 1500,
                         easing: 'easeOutBounce'
                     },
                     scales: {
@@ -219,9 +222,34 @@
             preguntaActual = 0;
             respuestasCorrectas = 0;
             respuestasIncorrectas = 0;
-            document.getElementById('pantalla-final').classList.add('hidden');
-            document.getElementById('pantalla-inicio').classList.remove('hidden');
+            transicionPantallas('pantalla-final', 'pantalla-inicio');
             actualizarGrafico();
+        }
+
+        function transicionPantallas(ocultarId, mostrarId) {
+            const ocultar = document.getElementById(ocultarId);
+            const mostrar = document.getElementById(mostrarId);
+            ocultar.classList.add('hidden');
+            mostrar.classList.remove('hidden');
+        }
+
+        function mostrarFondoDinamico(tipo) {
+            const fondo = document.getElementById('fondo-dinamico');
+            fondo.innerHTML = '';
+
+            if (tipo === 'triangulos') {
+                fondo.classList.remove('hidden');
+                for (let i = 0; i < 15; i++) {
+                    const t = document.createElement('div');
+                    t.className = 'triangulo';
+                    t.style.left = `${Math.random() * 100}%`;
+                    t.style.top = `${Math.random() * 100}%`;
+                    t.style.transform = `scale(${Math.random() * 0.8 + 0.3}) rotate(${Math.random() * 360}deg)`;
+                    fondo.appendChild(t);
+                }
+            } else {
+                fondo.classList.add('hidden');
+            }
         }
 
         actualizarGrafico();
