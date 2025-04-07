@@ -7,42 +7,11 @@
     <title>Quiz de Ángulos Internos</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            overflow-x: hidden;
-        }
-        .fondo-triangulos {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
-        .triangulo {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 25px solid rgba(59, 130, 246, 0.2);
-            animation: flotar 6s infinite ease-in-out;
-        }
-        @keyframes flotar {
-            0% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(30deg); }
-            100% { transform: translateY(0) rotate(0deg); }
-        }
-    </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 relative">
-    <!-- Fondo dinámico -->
-    <div id="fondo-dinamico" class="fondo-triangulos hidden"></div>
-
     <!-- Pantalla de inicio -->
-    <div id="pantalla-inicio" class="pantalla w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+    <div id="pantalla-inicio" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
         <h1 class="text-2xl font-bold text-center">Quiz de Ángulos Internos</h1>
         <input type="text" id="nombre-jugador" placeholder="Ingresa tu nombre" class="w-full p-2 border rounded" />
         <button onclick="comenzarJuego()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">Jugar</button>
@@ -53,14 +22,14 @@
     </div>
 
     <!-- Pantalla de preguntas -->
-    <div id="pantalla-preguntas" class="pantalla hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500 z-10">
-        <h2 class="text-xl font-bold">Pregunta <span id="numero-pregunta">1</span></h2>
-        <p id="pregunta-texto" class="text-lg">¿Cuál es la suma de los ángulos internos de un triángulo?</p>
-        <div id="opciones" class="space-y-2"></div>
+    <div id="pantalla-preguntas" class="relative hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500 z-10">
+        <h2 class="text-xl font-bold relative z-10">Pregunta <span id="numero-pregunta">1</span></h2>
+        <p id="pregunta-texto" class="text-lg relative z-10"></p>
+        <div id="opciones" class="space-y-2 relative z-10"></div>
     </div>
 
     <!-- Pantalla de resultados -->
-    <div id="pantalla-final" class="pantalla hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
+    <div id="pantalla-final" class="hidden w-full max-w-md bg-white p-8 rounded-2xl shadow-lg space-y-4 transition-all duration-500">
         <h2 class="text-2xl font-bold text-center">Resultados Finales</h2>
         <p id="resultado-texto" class="text-lg text-center"></p>
         <canvas id="graficoRankingFinal"></canvas>
@@ -70,21 +39,45 @@
     <script>
         const preguntas = [
             {
-                pregunta: "¿Cuál es la suma de los ángulos internos de un triángulo?",
-                opciones: ["180°", "360°", "90°", "270°"],
-                respuestaCorrecta: "180°",
-                tipo: "triangulos"
+                pregunta: "Un polígono tiene 10 lados. ¿Cuál es la suma de sus ángulos internos?",
+                opciones: ["1440°", "1080°", "1260°", "1620°"],
+                respuestaCorrecta: "1440°"
             },
             {
-                pregunta: "¿Cuál es la suma de los ángulos internos de un cuadrado?",
-                opciones: ["180°", "360°", "270°", "540°"],
-                respuestaCorrecta: "360°"
+                pregunta: "Un polígono tiene una suma de ángulos internos de 1620 grados. ¿Cuántos lados tiene?",
+                opciones: ["11", "10", "12", "9"],
+                respuestaCorrecta: "11"
             },
             {
-                pregunta: "¿Cuál es la suma de los ángulos internos de un pentágono?",
-                opciones: ["540°", "360°", "720°", "900°"],
-                respuestaCorrecta: "540°"
+                pregunta: "Un polígono regular tiene 15 lados. ¿Cuánto mide cada ángulo interno?",
+                opciones: ["156°", "144°", "165°", "150°"],
+                respuestaCorrecta: "156°"
             },
+            {
+                pregunta: "¿Es posible que un polígono tenga una suma de ángulos internos de 900 grados?",
+                opciones: ["No", "Sí, con 5 lados", "Sí, con 6 lados", "Sí, con 7 lados"],
+                respuestaCorrecta: "No"
+            },
+            {
+                pregunta: "Un polígono tiene 7 lados. Si se dibujan todas las diagonales posibles desde un vértice, ¿cuántos triángulos se forman?",
+                opciones: ["5", "6", "4", "7"],
+                respuestaCorrecta: "5"
+            },
+            {
+                pregunta: "Un polígono tiene 12 lados. Si se divide en triángulos mediante diagonales desde un solo vértice, ¿cuántos triángulos se forman?",
+                opciones: ["10", "9", "11", "8"],
+                respuestaCorrecta: "10"
+            },
+            {
+                pregunta: "Un polígono tiene una suma de 1980 grados. ¿Cuántos lados tiene?",
+                opciones: ["13", "12", "14", "11"],
+                respuestaCorrecta: "13"
+            },
+            {
+                pregunta: "Un polígono regular tiene una suma de ángulos internos de 1080 grados. ¿Cuál es la medida de cada ángulo externo?",
+                opciones: ["45°", "40°", "50°", "60°"],
+                respuestaCorrecta: "45°"
+            }
         ];
 
         let preguntaActual = 0;
@@ -93,36 +86,15 @@
         let jugadores = JSON.parse(localStorage.getItem('jugadores')) || [];
         let jugadorActual = "";
 
-        function actualizarGrafico() {
-            const ctx = document.getElementById('graficoRanking').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: jugadores.map(j => j.nombre),
-                    datasets: [{
-                        label: 'Puntaje',
-                        data: jugadores.map(j => j.puntaje),
-                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    animation: { duration: 1000 },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
         function comenzarJuego() {
             const nombre = document.getElementById('nombre-jugador').value.trim();
-            if (!nombre) return alert('Por favor, ingresa tu nombre.');
-
+            if (!nombre) {
+                alert('Por favor, ingresa tu nombre.');
+                return;
+            }
             jugadorActual = nombre;
-            transicionPantallas('pantalla-inicio', 'pantalla-preguntas');
+            document.getElementById('pantalla-inicio').classList.add('hidden');
+            document.getElementById('pantalla-preguntas').classList.remove('hidden');
             mostrarPregunta();
         }
 
@@ -133,6 +105,7 @@
 
             const opcionesDiv = document.getElementById('opciones');
             opcionesDiv.innerHTML = '';
+
             pregunta.opciones.forEach(opcion => {
                 const boton = document.createElement('button');
                 boton.textContent = opcion;
@@ -140,8 +113,6 @@
                 boton.onclick = () => seleccionarRespuesta(opcion, boton);
                 opcionesDiv.appendChild(boton);
             });
-
-            mostrarFondoDinamico(pregunta.tipo);
         }
 
         function seleccionarRespuesta(respuestaSeleccionada, boton) {
@@ -149,19 +120,11 @@
 
             Array.from(document.getElementById('opciones').children).forEach(b => {
                 b.disabled = true;
-                const esCorrecta = b.textContent === pregunta.respuestaCorrecta;
-                const esSeleccionada = b.textContent === respuestaSeleccionada;
-
-                if (esCorrecta) {
-                    b.classList.add('bg-green-300', 'animate-pulse');
-                } else if (esSeleccionada) {
-                    b.classList.add('bg-red-300', 'animate-pulse');
+                if (b.textContent === pregunta.respuestaCorrecta) {
+                    b.classList.add('bg-green-300');
+                } else if (b.textContent === respuestaSeleccionada) {
+                    b.classList.add('bg-red-300');
                 }
-
-                // Forzar reanimación para móviles
-                b.style.animation = 'none';
-                void b.offsetWidth;
-                b.style.animation = '';
             });
 
             if (respuestaSeleccionada === pregunta.respuestaCorrecta) {
@@ -178,11 +141,12 @@
                 } else {
                     mostrarResultados();
                 }
-            }, 1000);
+            }, 800);
         }
 
         function mostrarResultados() {
-            transicionPantallas('pantalla-preguntas', 'pantalla-final');
+            document.getElementById('pantalla-preguntas').classList.add('hidden');
+            document.getElementById('pantalla-final').classList.remove('hidden');
 
             const puntajeFinal = respuestasCorrectas * 10;
             jugadores.push({ nombre: jugadorActual, puntaje: puntajeFinal });
@@ -207,10 +171,6 @@
                 },
                 options: {
                     responsive: true,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutBounce'
-                    },
                     scales: {
                         y: { beginAtZero: true }
                     }
@@ -222,37 +182,36 @@
             preguntaActual = 0;
             respuestasCorrectas = 0;
             respuestasIncorrectas = 0;
-            transicionPantallas('pantalla-final', 'pantalla-inicio');
-            actualizarGrafico();
+            document.getElementById('pantalla-final').classList.add('hidden');
+            document.getElementById('pantalla-inicio').classList.remove('hidden');
+            generarRanking();
         }
 
-        function transicionPantallas(ocultarId, mostrarId) {
-            const ocultar = document.getElementById(ocultarId);
-            const mostrar = document.getElementById(mostrarId);
-            ocultar.classList.add('hidden');
-            mostrar.classList.remove('hidden');
-        }
-
-        function mostrarFondoDinamico(tipo) {
-            const fondo = document.getElementById('fondo-dinamico');
-            fondo.innerHTML = '';
-
-            if (tipo === 'triangulos') {
-                fondo.classList.remove('hidden');
-                for (let i = 0; i < 15; i++) {
-                    const t = document.createElement('div');
-                    t.className = 'triangulo';
-                    t.style.left = `${Math.random() * 100}%`;
-                    t.style.top = `${Math.random() * 100}%`;
-                    t.style.transform = `scale(${Math.random() * 0.8 + 0.3}) rotate(${Math.random() * 360}deg)`;
-                    fondo.appendChild(t);
+        function generarRanking() {
+            const ctx = document.getElementById('graficoRanking').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: jugadores.map(j => j.nombre),
+                    datasets: [{
+                        label: 'Puntaje',
+                        data: jugadores.map(j => j.puntaje),
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
                 }
-            } else {
-                fondo.classList.add('hidden');
-            }
+            });
         }
 
-        actualizarGrafico();
+        // Generar el ranking al cargar la página
+        window.onload = generarRanking;
     </script>
 </body>
 
